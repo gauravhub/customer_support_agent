@@ -286,6 +286,7 @@ dependencies = [
     { name = "langgraph" },
     { name = "langgraph-cli", extra = ["inmem"] },
     { name = "pandas" },
+    { name = "python-dotenv" },
     { name = "requests" },
 ]
 
@@ -299,6 +300,7 @@ requires-dist = [
     { name = "langgraph", specifier = ">=1.0.0" },
     { name = "langgraph-cli", extras = ["inmem"], specifier = ">=0.4.4" },
     { name = "pandas", specifier = ">=2.2.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "requests", specifier = ">=2.31.0" },
 ]
 

@@ -319,27 +319,38 @@ def get_response_generation_system_prompt(
 2. Use all three JSON objects (transaction, order, and refund) to generate your response
 
 **Response Requirements:**
-Generate a comprehensive response that:
-- **Acknowledges order receipt**: Clearly state whether the order has been received/processed based on the order details
-- **Summarizes current state**: Provide a clear summary using:
-  * Order details (status, date, items, etc.) from the order JSON object
-  * Transaction details (status, amount, payment method, etc.) from the transaction JSON object
-  * Refund details (status, amount, date, etc.) from the refund JSON object (if available)
-- **Addresses the issue**: Reference the category, summary, and description to provide relevant information
+Generate a concise, helpful response that:
+- **Acknowledges order receipt**: Briefly confirm whether the order was received/processed (one sentence)
+- **Provides a brief status summary**: Include only the most essential information in 2-3 bullet points, each on a separate line:
+  * Order status and key date
+  * Transaction status (if relevant to the issue)
+  * Refund status (if applicable)
+  
+  **Format the status summary with each bullet point on its own line, like this:**
+  ```
+  Current Status Summary:
+  - Order status: [status] (placed on [date])
+  - Transaction status: [status] (if relevant)
+  - Refund status: [status] (if applicable)
+  ```
+  
+- **Addresses the issue**: Reference the category and provide relevant context (2-3 sentences)
+- **Invites follow-up**: End with a brief invitation for the customer to ask questions or provide more details
 - **Is professional and helpful**: Maintain a professional, empathetic, and solution-oriented tone
 
 **Important Guidelines:**
+- **BE CONCISE**: Keep the entire response under 150 words. The "Current Status Summary" should be 2-3 bullet points maximum, each on a separate line
+- **Formatting**: Use proper line breaks (\n) between bullet points - each bullet point must be on its own line
 - Follow the workflow above based on what identifiers are available
 - Only use information you can verify through the tools
-- If a tool returns an empty result, acknowledge this in your response
-- Be specific about order status, transaction status, and refund status when available
-- Reference specific details from the fetched JSON objects (order numbers, dates, amounts, statuses, etc.)
-- Keep the response comprehensive but well-structured and easy to read
+- If a tool returns an empty result, acknowledge this briefly in your response
+- Focus on the most relevant details - don't list every field from the JSON objects
 - **CRITICAL - ID Usage**: 
   * Only share order_no or transaction_id with the customer - never both
   * Prefer sharing order_no if available, otherwise share transaction_id
   * DO NOT mention any other internal IDs such as refund_id, customer_id, or any other internal identifiers
   * These internal IDs (refund_id, customer_id, etc.) are for internal use only and must never be exposed to customers
+- **Leave room for questions**: Keep the response brief so the customer can ask follow-up questions about specific details
 
 **Available Tools:**
 - `find_transaction(transaction_id)`: Fetch complete transaction details by transaction ID
