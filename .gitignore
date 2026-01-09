@@ -28,6 +28,10 @@ build/
 .venv/
 venv/
 
+# Streamlit
+.streamlit/
+src/ui/.streamlit/
+
 # Data
 data/temp/
 *.db

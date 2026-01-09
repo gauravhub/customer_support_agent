@@ -72,8 +72,8 @@ def customer_conversation_node(
         system_prompt=system_prompt,
         middleware=[AgentCoreMemoryMiddleware(
             cfg,
-            actor_id=state.get("customer_email"),
-            session_id=state.get("issue_no")
+            actor_id=config.get("configurable", {}).get("actor_id") if config else None,
+            session_id=config.get("configurable", {}).get("thread_id") if config else None
         )],
     )
     

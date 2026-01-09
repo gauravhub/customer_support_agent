@@ -135,35 +135,23 @@ def extract_json_from_response(response_content: str) -> Dict[str, Any]:
         raise ValueError(f"Could not extract valid JSON from response: {response_content[:200]}")
 
 
-def initialize_database(config: Configuration = None) -> None:
+def initialize_database() -> None:
     """Initialize the customer support database.
     
     This function loads sample data from JSON files into the SQLite database.
     It should be called when the graph is loaded to ensure the database is ready.
     
-    The database path and other settings are read from the provided Configuration
-    or from environment variables/defaults if not provided.
-    
-    Args:
-        config: Optional Configuration object. If None, creates one with defaults.
+    The database path and other settings are read from environment variables/defaults.
     
     Note:
         This function is idempotent - it can be called multiple times safely.
         If the database is already initialized, it will be re-initialized with
         fresh data from the JSON files.
-        
-        Important: If a custom database_path is used via RunnableConfig, ensure
-        the same path is used for both initialization and tool execution.
     """
     try:
-        # Use provided config or create one from environment variables/defaults
-        if config is None:
-            # For database initialization, we only need database_path
-            # Provide default values for required Jira fields that aren't needed for DB init
-            config = Configuration(
-                jira_category_field_id=0,  # Placeholder - not used for DB initialization
-                jira_response_field_id=0,   # Placeholder - not used for DB initialization
-            )
+        # Create configuration from environment variables/defaults
+        # Configuration() will automatically use defaults and load from env vars
+        config = Configuration()
         
         # Create database service and initialize
         db_service = DatabaseService(config)

@@ -72,7 +72,23 @@ builder.add_conditional_edges(
     }
 )
 
-builder.add_edge("Collect Customer Information", "Fetch Issue Details")
+# Conditional edge from Collect Customer Information based on issue_no
+def route_after_collect_info(state: CustomerSupportState) -> str:
+    """Route after collecting customer information based on whether issue_no exists."""
+    issue_no = state.get("issue_no")
+    if issue_no:
+        return "Fetch Issue Details"
+    else:
+        return "end"
+
+builder.add_conditional_edges(
+    "Collect Customer Information",
+    route_after_collect_info,
+    {
+        "Fetch Issue Details": "Fetch Issue Details",
+        "end": END
+    }
+)
 
 # Triage workflow sequence
 builder.add_edge("Fetch Issue Details", "Assign Support Contact")

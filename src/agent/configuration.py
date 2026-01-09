@@ -197,4 +197,3 @@ class Configuration(BaseModel):
         
         # Create instance with environment values, missing fields will use defaults
         return cls(**values)
-

@@ -33,7 +33,8 @@ class AgentCoreMemoryMiddleware(AgentMiddleware):
     - Extracts messages from the agent state
     - Converts them to AgentCore Memory format
     - Stores them using the AgentCore Memory service
-    - Uses customer_email as actor_id and issue_no as session_id
+    - Uses actor_id (sanitized username/email) and thread_id (LangGraph thread ID) as session_id
+    - These values are typically passed via config.configurable from the UI
     """
     
     def __init__(self, config: Configuration, actor_id: Optional[str] = None, session_id: Optional[str] = None):
@@ -41,8 +42,11 @@ class AgentCoreMemoryMiddleware(AgentMiddleware):
         
         Args:
             config: Configuration object containing AgentCore Memory settings
-            actor_id: Optional actor ID (customer_email). If not provided, will try to extract from state.
-            session_id: Optional session ID (issue_no). If not provided, will try to extract from state.
+            actor_id: Optional actor ID (sanitized username/email from UI). 
+                     Typically passed via config.configurable.actor_id.
+            session_id: Optional session ID (LangGraph thread_id). 
+                       Typically passed via config.configurable.thread_id.
+                       This should be the LangGraph thread ID, not issue_no.
         """
         super().__init__()
         self.config = config
@@ -99,31 +103,37 @@ class AgentCoreMemoryMiddleware(AgentMiddleware):
             actor_id = self.actor_id
             session_id = self.session_id
             
-            # If not set during init, try to get from state (though AgentState typically only has messages)
+            # If not set during init, try to get from runtime config (preferred) or state (fallback)
+            # Priority: 1) Instance variables (from config.configurable), 2) Runtime config, 3) State (legacy)
+            if not actor_id or not session_id:
+                try:
+                    # Try to get config from runtime
+                    if hasattr(runtime, 'config') and runtime.config:
+                        runtime_config = runtime.config if isinstance(runtime.config, dict) else getattr(runtime.config, 'configurable', {})
+                        if isinstance(runtime_config, dict):
+                            configurable = runtime_config.get("configurable", {})
+                            if not actor_id and configurable.get("actor_id"):
+                                actor_id = configurable.get("actor_id")
+                                logger.info(f"📋 Retrieved actor_id from runtime config: {actor_id}")
+                            if not session_id and configurable.get("thread_id"):
+                                session_id = configurable.get("thread_id")
+                                logger.info(f"📋 Retrieved session_id (thread_id) from runtime config: {session_id}")
+                except Exception as e:
+                    logger.debug(f"Could not access runtime config: {e}")
+            
+            # Fallback: Try to get from state (legacy support, but not recommended)
             if not actor_id:
                 actor_id = state.get("customer_email") if hasattr(state, 'get') else None
                 if not actor_id and isinstance(state, dict):
                     actor_id = state.get("customer_email")
             
             if not session_id:
+                # Legacy: try issue_no as fallback, but prefer thread_id from config
                 session_id = state.get("issue_no") if hasattr(state, 'get') else None
                 if not session_id and isinstance(state, dict):
                     session_id = state.get("issue_no")
-            
-            # Try accessing via runtime context if still not found
-            if (not actor_id or not session_id) and hasattr(runtime, 'get_state'):
-                try:
-                    # Try to get full state from runtime
-                    full_state = runtime.get_state() if callable(getattr(runtime, 'get_state', None)) else None
-                    if full_state:
-                        if not actor_id:
-                            actor_id = full_state.get("customer_email") if isinstance(full_state, dict) else getattr(full_state, "customer_email", None)
-                        if not session_id:
-                            session_id = full_state.get("issue_no") if isinstance(full_state, dict) else getattr(full_state, "issue_no", None)
-                        if actor_id or session_id:
-                            logger.info(f"📋 Retrieved from runtime state - actor_id: {actor_id}, session_id: {session_id}")
-                except Exception as e:
-                    logger.debug(f"Could not access runtime state: {e}")
+                if session_id:
+                    logger.warning(f"⚠️ Using issue_no as session_id (legacy fallback). Prefer thread_id from config.configurable.")
             
             logger.info(f"📋 Final state extraction - actor_id: {actor_id}, session_id: {session_id}")
             

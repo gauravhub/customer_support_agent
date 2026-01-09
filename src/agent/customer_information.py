@@ -126,8 +126,8 @@ def collect_customer_information_node(
         system_prompt=get_customer_information_system_prompt(state.get("customer_email"), state.get("issue_no")),
         middleware=[AgentCoreMemoryMiddleware(
             cfg,
-            actor_id=state.get("customer_email"),
-            session_id=state.get("issue_no")
+            actor_id=config.get("configurable", {}).get("actor_id") if config else None,
+            session_id=config.get("configurable", {}).get("thread_id") if config else None
         )],
     )
     

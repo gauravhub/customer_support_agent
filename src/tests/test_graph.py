@@ -11,10 +11,10 @@ from langchain_core.runnables import RunnableConfig
 
 from agent.configuration import Configuration
 from agent.state import CustomerSupportState
-from tests.test_bedrock import run_all_bedrock_tests
-from tests.test_configuration import test_configuration_from_runnable_config
-from tests.test_database import test_database_service
-from tests.test_jira import test_jira_service
+from src.tests.test_bedrock import run_all_bedrock_tests
+from src.tests.test_configuration import test_configuration_from_runnable_config
+from src.tests.test_database import test_database_service
+from src.tests.test_jira import test_jira_service
 
 
 def test_node(state: CustomerSupportState, config: RunnableConfig):

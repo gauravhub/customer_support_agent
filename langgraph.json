@@ -1,7 +1,7 @@
 {
     "graphs": {
         "Customer Support Agent": "./src/agent/graph.py:graph",
-        "Service Tests": "./tests/test_graph.py:test_graph"
+        "Service Tests": "./src/tests/test_graph.py:test_graph"
     },
     "python_version": "3.12",
     "env": "./.env",
