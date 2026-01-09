@@ -1,0 +1,34 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# LangGraph
+.checkpoints/
+.langgraph_api/
+
+# Cursor
+.cursor/
+
+# Virtual Environment
+.venv/
+venv/
+
+# Data
+data/temp/
+*.db
+
