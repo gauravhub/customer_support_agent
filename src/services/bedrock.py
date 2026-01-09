@@ -88,10 +88,12 @@ class BedrockService:
         )
     
     def get_reasoning_llm(self) -> ChatBedrockConverse:
-        """Get reasoning LLM for agent tasks and complex reasoning.
+        """Get reasoning LLM for agent tasks and complex reasoning with guardrails if configured.
         
         Uses Claude 4 Sonnet by default, which is optimized for reasoning tasks
         and agent workflows.
+        Uses guardrails if guardrail_id is configured, otherwise returns plain LLM.
+        For customer support, guardrails are recommended for content safety.
         
         Note:
             ChatBedrockConverse uses boto3, which automatically picks up AWS credentials
@@ -101,10 +103,20 @@ class BedrockService:
         Returns:
             ChatBedrockConverse instance configured for reasoning/agent tasks
         """
-        return ChatBedrockConverse(
-            model=self.config.reasoning_model,
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
-            region_name=self.aws_region,
-        )
+        llm_params = {
+            "model": self.config.reasoning_model,
+            "temperature": self.config.temperature,
+            "max_tokens": self.config.max_tokens,
+            "region_name": self.aws_region,
+        }
+        
+        # Add guardrails if configured
+        if self.guardrail_id:
+            llm_params["guardrails"] = {
+                "guardrailIdentifier": self.guardrail_id,
+                "guardrailVersion": self.guardrail_version,
+                "trace": "enabled"
+            }
+        
+        return ChatBedrockConverse(**llm_params)
 
