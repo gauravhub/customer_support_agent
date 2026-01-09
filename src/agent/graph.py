@@ -90,5 +90,6 @@ builder.add_edge("Generate Response", END)  # After triage, end workflow
 # builder.add_interrupt_after(["Generate Response"])
 
 # Compile the graph
+# Note: LangGraph API (langgraph dev and LangSmith deployment) handles persistence automatically
 graph = builder.compile()
 

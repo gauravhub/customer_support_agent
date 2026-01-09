@@ -11,6 +11,7 @@ from langchain_core.runnables import RunnableConfig
 from agent.configuration import Configuration
 from agent.state import CustomerSupportState
 from agent.prompts import get_customer_conversation_system_prompt
+from agent.middleware import AgentCoreMemoryMiddleware
 from tools.database import (
     find_customer,
     find_order,
@@ -57,7 +58,8 @@ def customer_conversation_node(
     # If issue_no exists, create agent with all context and tools
     system_prompt = get_customer_conversation_system_prompt(state)
     
-    # Create agent with all available database tools
+    # Create agent with all available database tools and memory middleware
+    # Pass actor_id and session_id from state to middleware
     agent = create_agent(
         model=llm,
         tools=[
@@ -68,6 +70,11 @@ def customer_conversation_node(
             get_refund_for_order,
         ],
         system_prompt=system_prompt,
+        middleware=[AgentCoreMemoryMiddleware(
+            cfg,
+            actor_id=state.get("customer_email"),
+            session_id=state.get("issue_no")
+        )],
     )
     
     # Invoke agent with current messages

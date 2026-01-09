@@ -12,6 +12,7 @@ from agent.configuration import Configuration
 from agent.state import CustomerSupportState
 from agent.prompts import get_response_generation_system_prompt
 from agent.utils import extract_text_content
+from agent.middleware import AgentCoreMemoryMiddleware
 from tools.database import (
     find_transaction,
     find_order,
@@ -70,7 +71,8 @@ def update_response_node(
         order_no=order_no
     )
     
-    # Create agent with database query tools
+    # Create agent with database query tools and memory middleware
+    # Pass actor_id and session_id from state to middleware
     response_agent = create_agent(
         model=llm,
         tools=[
@@ -80,6 +82,11 @@ def update_response_node(
             get_refund_for_order,
         ],
         system_prompt=system_prompt,
+        middleware=[AgentCoreMemoryMiddleware(
+            cfg,
+            actor_id=state.get("customer_email"),
+            session_id=state.get("issue_no")
+        )],
     )
     
     # Invoke agent - it will use tools to fetch details and generate response

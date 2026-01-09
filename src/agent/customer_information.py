@@ -12,6 +12,7 @@ from langchain_core.tools import tool
 from agent.configuration import Configuration
 from agent.state import CustomerSupportState
 from agent.prompts import get_customer_information_system_prompt
+from agent.middleware import AgentCoreMemoryMiddleware
 from tools.database import (
     find_customer,
     initialize_customer_validation_tools,
@@ -113,7 +114,8 @@ def collect_customer_information_node(
             "customer_name": customer.get("name")
         }
     
-    # Create agent with database query and recording tools
+    # Create agent with database query and recording tools and memory middleware
+    # Pass actor_id and session_id from state to middleware
     customer_information_agent = create_agent(
         model=llm,
         tools=[
@@ -122,6 +124,11 @@ def collect_customer_information_node(
             record_customer_info
         ],
         system_prompt=get_customer_information_system_prompt(state.get("customer_email"), state.get("issue_no")),
+        middleware=[AgentCoreMemoryMiddleware(
+            cfg,
+            actor_id=state.get("customer_email"),
+            session_id=state.get("issue_no")
+        )],
     )
     
     # Invoke agent - it will process the user's message and ask for missing info if needed

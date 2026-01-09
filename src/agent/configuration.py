@@ -95,6 +95,12 @@ class Configuration(BaseModel):
         description="Path to SQLite database file"
     )
     
+    # AgentCore Memory configuration
+    agentcore_memory_id: Optional[str] = Field(
+        default=None,
+        description="AgentCore Memory ID for persistent checkpointing. Set via AGENTCORE_MEMORY_ID environment variable."
+    )
+    
     @model_validator(mode='before')
     @classmethod
     def load_from_env(cls, data: Any) -> dict[str, Any]:
