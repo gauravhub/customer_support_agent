@@ -39,7 +39,7 @@ def customer_conversation_node(
     Returns:
         Updated state with agent's response
     """
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     bedrock_service = BedrockService(cfg)
     llm = bedrock_service.get_reasoning_llm()
     messages = state.get("messages", [])

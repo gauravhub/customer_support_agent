@@ -9,11 +9,7 @@ Once information is collected, the workflow can proceed to issue triage.
 """
 
 from langgraph.graph import StateGraph, START, END, MessagesState
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-from langchain_core.runnables import RunnableConfig
-
-from agent.configuration import Configuration
 from agent.state import CustomerSupportState
 from agent.customer_conversation import customer_conversation_node
 from agent.customer_information import collect_customer_information_node
@@ -37,8 +33,8 @@ initialize_database()
 # Create the graph builder
 builder = StateGraph(
     CustomerSupportState,
-    input_schema=MessagesState,
-    config_schema=Configuration
+    input_schema=MessagesState
+    # No config_schema needed - all configuration comes from environment variables
 )
 
 # Add nodes

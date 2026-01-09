@@ -213,8 +213,27 @@ class AgentCoreMemoryMiddleware(AgentMiddleware):
                     messages=conversation_messages
                 )
                 
-                event_id = result.get("eventId") if isinstance(result, dict) else "unknown"
-                logger.info(f"✅ Successfully stored event in AgentCore Memory - event_id: {event_id}")
+                # Extract event_id from response
+                # According to AWS API docs, response structure is: {"event": {"eventId": "...", ...}}
+                event_id = None
+                if isinstance(result, dict):
+                    # The API returns: {"event": {"eventId": "...", ...}}
+                    event_obj = result.get("event", {})
+                    if isinstance(event_obj, dict):
+                        event_id = event_obj.get("eventId")
+                    # Fallback: try direct access (in case response structure differs)
+                    if not event_id:
+                        event_id = result.get("eventId")
+                else:
+                    logger.debug(f"🔍 create_event response type: {type(result)}, value: {result}")
+                
+                if event_id:
+                    logger.info(f"✅ Successfully stored event in AgentCore Memory - event_id: {event_id}")
+                else:
+                    # Log full response for debugging
+                    logger.debug(f"🔍 create_event response keys: {list(result.keys()) if isinstance(result, dict) else 'N/A'}")
+                    logger.debug(f"🔍 create_event full response: {result}")
+                    logger.info(f"✅ Successfully stored event in AgentCore Memory - event_id: None (could not extract from response)")
             else:
                 logger.info("⏭️ Skipping: No conversation messages to store")
         

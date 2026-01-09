@@ -47,7 +47,7 @@ def update_response_node(
         # No issue_no - skip response update
         return {}
     
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     bedrock_service = BedrockService(cfg)
     llm = bedrock_service.get_reasoning_llm()
     messages = state.get("messages", [])

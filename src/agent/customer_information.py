@@ -91,7 +91,7 @@ def collect_customer_information_node(
     The agent handles its own looping - it will extract information, check what's missing,
     and ask for more details until all required information is collected.
     """
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     bedrock_service = BedrockService(cfg)
     llm = bedrock_service.get_reasoning_llm()
     messages = state.get("messages", [])

@@ -1,10 +1,10 @@
 """Configuration management for the Customer Support agent."""
 
 import os
+import json
 from pathlib import Path
 from typing import Optional, Any, get_origin, get_args
 
-from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field, model_validator
 
 # Try to load .env file if python-dotenv is available
@@ -101,18 +101,19 @@ class Configuration(BaseModel):
         description="AgentCore Memory ID for persistent checkpointing. Set via AGENTCORE_MEMORY_ID environment variable."
     )
     
-    @model_validator(mode='before')
     @classmethod
-    def load_from_env(cls, data: Any) -> dict[str, Any]:
-        """Load configuration from environment variables before Pydantic validation.
+    def from_environment(cls) -> "Configuration":
+        """Create a Configuration instance from environment variables.
         
-        This ensures environment variables are always checked, even when LangGraph
-        creates Configuration directly from RunnableConfig.
+        Loads configuration from:
+        1. Environment variables (uppercase, e.g., TEXT_MODEL, REASONING_MODEL)
+        2. Field defaults (if environment variable not set)
+        
+        Environment variables take precedence over defaults.
+        
+        Returns:
+            Configuration instance with values loaded from environment variables
         """
-        if not isinstance(data, dict):
-            data = {}
-        
-        # Build values dict from environment variables
         values: dict[str, Any] = {}
         field_names = list(cls.model_fields.keys())
         
@@ -141,59 +142,8 @@ class Configuration(BaseModel):
                     else:
                         values[field_name] = env_value
                 except (ValueError, TypeError):
-                    # If type conversion fails, skip this field
-                    pass
-        
-        # Merge: env vars take precedence, then data (from RunnableConfig), then defaults
-        # Start with data, then override with env vars
-        result = {**data, **values}
-        return result
-    
-    @classmethod
-    def from_runnable_config(
-        cls, config: Optional[RunnableConfig] = None
-    ) -> "Configuration":
-        """Create a Configuration instance from environment variables.
-        
-        Loads configuration from:
-        1. Environment variables (uppercase, e.g., TEXT_MODEL, REASONING_MODEL)
-        2. Field defaults (if environment variable not set)
-        
-        Environment variables take precedence over defaults.
-        RunnableConfig is ignored - all configuration must come from environment variables.
-        """
-        field_names = list(cls.model_fields.keys())
-        
-        values: dict[str, Any] = {}
-        for field_name in field_names:
-            env_value = os.environ.get(field_name.upper())
-            if env_value is not None and env_value.strip():  # Also check for empty strings
-                # Convert string to appropriate type based on field type
-                field_info = cls.model_fields[field_name]
-                field_type = field_info.annotation
-                
-                # Handle Optional types - extract the inner type
-                origin = get_origin(field_type)
-                if origin is not None:
-                    # For Optional[Type], get_args returns (Type, NoneType)
-                    args = get_args(field_type)
-                    if args:
-                        # Get the first non-None type
-                        field_type = next((arg for arg in args if arg is not type(None)), str)
-                
-                # Type conversion
-                try:
-                    if field_type == int:
-                        values[field_name] = int(env_value)
-                    elif field_type == float:
-                        values[field_name] = float(env_value)
-                    elif field_type == bool:
-                        values[field_name] = env_value.lower() in ('true', '1', 'yes', 'on')
-                    else:
-                        values[field_name] = env_value
-                except (ValueError, TypeError) as e:
                     # If type conversion fails, skip this field and use default
-                    print(f"Warning: Could not convert environment variable {field_name.upper()}={env_value} to {field_type}: {e}")
+                    pass
         
         # Create instance with environment values, missing fields will use defaults
         return cls(**values)

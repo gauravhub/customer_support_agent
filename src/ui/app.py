@@ -505,10 +505,15 @@ def _stream_with_sdk(
         if not st.session_state.thread_id:
             raise ValueError("Thread ID is required. Please ensure thread is created before streaming.")
         
-        # Ensure config has the correct thread_id (same as session_id for AgentCore Memory)
+        # Ensure config has the correct thread_id and actor_id
         if "configurable" not in config:
             config["configurable"] = {}
         config["configurable"]["thread_id"] = st.session_state.thread_id
+        # Preserve actor_id if it exists, or get it from session state
+        if "actor_id" not in config["configurable"]:
+            username = st.session_state.get("user_email") or st.session_state.get("username")
+            if username:
+                config["configurable"]["actor_id"] = sanitize_actor_id(username)
         
         # Prepare input
         input_data = {
@@ -574,10 +579,15 @@ def _stream_with_requests(
     if not st.session_state.thread_id:
         raise ValueError("Thread ID is required. Please ensure thread is created before streaming.")
     
-    # Ensure config has the correct thread_id (same as session_id for AgentCore Memory)
+    # Ensure config has the correct thread_id and actor_id
     if "configurable" not in config:
         config["configurable"] = {}
     config["configurable"]["thread_id"] = st.session_state.thread_id
+    # Preserve actor_id if it exists, or get it from session state
+    if "actor_id" not in config["configurable"]:
+        username = st.session_state.get("user_email") or st.session_state.get("username")
+        if username:
+            config["configurable"]["actor_id"] = sanitize_actor_id(username)
     
     # Prepare request payload
     request_payload = {

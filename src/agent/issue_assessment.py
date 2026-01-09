@@ -46,7 +46,7 @@ def fetch_issue_details_node(
         return {}
     
     updates = {}
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     jira_service = JiraService(cfg)
     jira_issue = jira_service.fetch_issue(issue_no)
     
@@ -99,7 +99,7 @@ def update_assignee_node(
     Returns:
         Updated state (assignee may be updated)
     """
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     
     issue_no = state.get("issue_no")
     if not issue_no:
@@ -138,7 +138,7 @@ def update_category_node(
     if not issue_no:
         return {}
     
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     bedrock_service = BedrockService(cfg)
     llm = bedrock_service.get_text_llm()
     
@@ -178,7 +178,7 @@ def analyze_attachments_node(
     Returns:
         Updated state with transaction_id if found in attachments
     """
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     bedrock_service = BedrockService(cfg)
     
     # Check if we have attachments
@@ -251,7 +251,7 @@ def analyze_summary_node(
     Returns:
         Updated state with order_no/transaction_id and fetched details
     """
-    cfg = Configuration.from_runnable_config(config)
+    cfg = Configuration.from_environment()
     bedrock_service = BedrockService(cfg)
     llm = bedrock_service.get_text_llm()
     

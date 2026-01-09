@@ -150,8 +150,7 @@ def initialize_database() -> None:
     """
     try:
         # Create configuration from environment variables/defaults
-        # Configuration() will automatically use defaults and load from env vars
-        config = Configuration()
+        config = Configuration.from_environment()
         
         # Create database service and initialize
         db_service = DatabaseService(config)
