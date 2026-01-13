@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Dict
 
 from agent.configuration import Configuration
-from services.database import DatabaseService
 
 
 def clean_json_string(json_string: str) -> str:
@@ -133,43 +132,6 @@ def extract_json_from_response(response_content: str) -> Dict[str, Any]:
         
         # If still no luck, raise error
         raise ValueError(f"Could not extract valid JSON from response: {response_content[:200]}")
-
-
-def initialize_database() -> None:
-    """Initialize the customer support database.
-    
-    This function loads sample data from JSON files into the SQLite database.
-    It should be called when the graph is loaded to ensure the database is ready.
-    
-    The database path and other settings are read from environment variables/defaults.
-    
-    Note:
-        This function is idempotent - it can be called multiple times safely.
-        If the database is already initialized, it will be re-initialized with
-        fresh data from the JSON files.
-    """
-    try:
-        # Create configuration from environment variables/defaults
-        config = Configuration.from_environment()
-        
-        # Create database service and initialize
-        db_service = DatabaseService(config)
-        init_results = db_service.initialize()
-        
-        # Log initialization results
-        success_count = sum(1 for r in init_results.values() if r.get("status") == "SUCCESS")
-        total_tables = len(init_results)
-        
-        print(f"Database initialization: {success_count}/{total_tables} tables imported successfully (path: {config.database_path})")
-        
-        # Print any errors
-        for table_name, result in init_results.items():
-            if result.get("status") == "ERROR":
-                print(f"Warning: Failed to import {table_name}: {result.get('error')}")
-    except Exception as e:
-        print(f"Warning: Database initialization failed: {str(e)}")
-        # Don't raise - allow graph to load even if database init fails
-        # The database will be initialized when first accessed
 
 
 def extract_text_content(content) -> str:

@@ -21,10 +21,6 @@ from agent.issue_assessment import (
     analyze_summary_node,
 )
 from agent.response_generation import update_response_node
-from agent.utils import initialize_database
-
-# Initialize database when graph module is loaded
-initialize_database()
 
 # ============================================================================
 # GRAPH CONSTRUCTION

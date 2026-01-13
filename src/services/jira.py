@@ -55,7 +55,7 @@ class JiraService:
         
         # Setup temp directory for downloads
         project_root = Path(__file__).parent.parent.parent
-        self.temp_path = project_root / "data" / "temp"
+        self.temp_path = project_root / "tmp-files"
         self.temp_path.mkdir(parents=True, exist_ok=True)
     
     def _get_client(self) -> JIRA:

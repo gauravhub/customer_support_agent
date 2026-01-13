@@ -89,16 +89,28 @@ class Configuration(BaseModel):
         description="Jira custom field ID for ticket response (e.g., 10072 for customfield_10072). Set via JIRA_RESPONSE_FIELD_ID environment variable."
     )
     
-    # Database configuration
-    database_path: str = Field(
-        default="./data/customer_support.db",
-        description="Path to SQLite database file"
-    )
-    
     # AgentCore Memory configuration
     agentcore_memory_id: Optional[str] = Field(
         default=None,
         description="AgentCore Memory ID for persistent checkpointing. Set via AGENTCORE_MEMORY_ID environment variable."
+    )
+    
+    # MCP Server configuration
+    mcp_server_url: Optional[str] = Field(
+        default=None,
+        description="MCP server URL for database tools. Set via MCP_SERVER_URL environment variable."
+    )
+    mcp_cognito_client_id: Optional[str] = Field(
+        default=None,
+        description="Cognito client ID for MCP server authentication. Set via MCP_COGNITO_CLIENT_ID environment variable."
+    )
+    mcp_cognito_client_secret: Optional[str] = Field(
+        default=None,
+        description="Cognito client secret for MCP server authentication. Set via MCP_COGNITO_CLIENT_SECRET environment variable."
+    )
+    mcp_cognito_token_endpoint: Optional[str] = Field(
+        default=None,
+        description="Cognito OAuth2 token endpoint URL (required for OAuth). Set via MCP_COGNITO_TOKEN_ENDPOINT environment variable. Format: https://<cognito-domain>.auth.<region>.amazoncognito.com/oauth2/token"
     )
     
     @classmethod

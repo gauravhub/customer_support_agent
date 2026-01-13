@@ -19,8 +19,6 @@ from tools.database import (
 )
 from tools.jira import get_jira_field_value, initialize_jira_tools
 from services.bedrock import BedrockService
-from services.database import DatabaseService
-
 
 @tool
 def record_customer_info(
@@ -106,12 +104,12 @@ def collect_customer_information_node(
         state.get("issue_no")
     ])
     if has_required_info:
-        # Fetch customer name from database
-        db_service = DatabaseService(cfg)
-        customer = db_service.find_customer(email=state.get("customer_email"))
+        # Fetch customer name from database using MCP tool
+        customer_result = find_customer.invoke({"email": state.get("customer_email")})
+        customer_name = customer_result.get("name") if isinstance(customer_result, dict) else None
         
         return {
-            "customer_name": customer.get("name")
+            "customer_name": customer_name
         }
     
     # Create agent with database query and recording tools and memory middleware
@@ -154,13 +152,11 @@ def collect_customer_information_node(
             final_email = updates.get("customer_email") or state.get("customer_email")
             final_issue = updates.get("issue_no") or state.get("issue_no")
             
-            # If we now have both email and issue, fetch customer name
+            # If we now have both email and issue, fetch customer name using MCP tool
             if final_email and final_issue:
-                db_service = DatabaseService(cfg)
-                customer = db_service.find_customer(email=final_email)
-                
-                if customer:
-                    updates["customer_name"] = customer.get("name")
+                customer_result = find_customer.invoke({"email": final_email})
+                if isinstance(customer_result, dict) and customer_result.get("name"):
+                    updates["customer_name"] = customer_result.get("name")
         
         # Extract new messages from agent result (incremental messages only)
         if isinstance(result, dict) and "messages" in result:

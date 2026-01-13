@@ -23,7 +23,6 @@ from agent.prompts import (
 from agent.utils import add_image_content, extract_json_from_response, extract_text_content
 from services.bedrock import BedrockService
 from services.jira import JiraService
-from services.database import DatabaseService
 
 
 def fetch_issue_details_node(
